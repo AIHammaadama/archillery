@@ -12,6 +12,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReceiptController;
 
 /*
 |--------------------------------------------------------------------------
@@ -122,6 +123,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
             Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
             Route::get('/projects/{project}/requests', [ProjectController::class, 'requests'])->name('projects.requests');
+            Route::get('/projects/{project}/attachments/{index}', [ProjectController::class, 'viewAttachment'])->name('projects.attachment.view');
+            Route::get('/projects/expenses/{expense}/receipt', [ProjectController::class, 'viewExpenseReceipt'])->name('projects.expenses.receipt.view');
         });
 
         Route::middleware('permission:create-projects')->group(function () {
@@ -141,6 +144,8 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('permission:edit-projects')->group(function () {
             Route::delete('/projects/{project}/attachment', [ProjectController::class, 'deleteAttachment'])
                 ->name('projects.delete-attachment');
+            Route::post('/projects/{project}/expenses', [ProjectController::class, 'storeExpense'])
+                ->name('projects.expenses.store');
         });
 
         /* ---------------- Materials ---------------- */
@@ -161,6 +166,8 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('permission:view-requests')->group(function () {
             Route::get('/requests', [ProcurementRequestController::class, 'index'])->name('requests.index');
             Route::get('/requests/{request}', [ProcurementRequestController::class, 'show'])->name('requests.show');
+            Route::get('/receipts/{receipt}/download', [ReceiptController::class, 'download'])->name('receipts.download');
+            Route::post('/requests/{request}/receipts', [ReceiptController::class, 'store'])->name('requests.receipts.store');
         });
 
         Route::middleware('permission:create-purchase-request')->group(function () {

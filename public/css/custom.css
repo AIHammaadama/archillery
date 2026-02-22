@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #f46839;
-    --primary-color-hover: #e85d2f;
+    --primary-color: #1abe68;
+    --primary-color-hover: #36be78;
 }
 
 .login-bg {
@@ -253,7 +253,7 @@ body.dark-mode .form-control::placeholder {
 body.dark-mode .form-control:focus {
     background-color: #1e1e2e;
     color: #fff;
-    border-color: #f46839;
+    border-color: #1abe68;
     box-shadow: none;
 }
 
@@ -319,8 +319,8 @@ body.dark-mode .dataTables_wrapper .pagination .page-link {
 }
 
 body.dark-mode .dataTables_wrapper .pagination .page-item.active .page-link {
-    background-color: #f46839;
-    border-color: #f46839;
+    background-color: #1abe68;
+    border-color: #1abe68;
 }
 
 /* Search box (DataTables auto search) */
@@ -531,4 +531,4 @@ body.dark-mode .logo-dark {
 .card-accent-info::before { background-color: #0dcaf0; }
 .card-accent-danger::before { background-color: #dc3545; }
 /* Your brand color */
-.card-accent-brand::before { background-color: #f46839; }
+.card-accent-brand::before { background-color: #1abe68; }

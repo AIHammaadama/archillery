@@ -1,0 +1,190 @@
+# Enhance Laravel Procurement System
+
+This plan outlines the implementation guidelines for adding comprehensive project spending reports and payment receipt uploads to the existing Project Procurement Management System.
+
+## Proposed Changes
+
+### 1. Comprehensive Project Spending Report
+
+**Database Structure & Migrations**
+We recommend creating a unified `project_expenses` table. This is cleaner than linking multiple disparate tables for every minor expense type and makes aggregation queries highly efficient.
+
+#### [NEW] `database/migrations/xxxx_xx_xx_xxxxxx_create_project_expenses_table.php`
+```php
+Schema::create('project_expenses', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('project_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('recorded_by')->constrained('users');
+    $table->enum('expense_type', ['artisan_payment', 'miscellaneous', 'extra_fee', 'other']);
+    $table->string('description');
+    $table->decimal('amount', 15, 2);
+    $table->date('expense_date');
+    $table->string('receipt_path')->nullable(); // Optional proof of expense
+    $table->timestamps();
+});
+```
+
+**Model Relationships**
+#### [NEW] [app/Models/ProjectExpense.php](file:///Users/Ahmadx/Downloads/archillery/app/Models/ProjectExpense.php)
+```php
+class ProjectExpense extends Model {
+    protected $fillable = ['project_id', 'recorded_by', 'expense_type', 'description', 'amount', 'expense_date', 'receipt_path'];
+    protected $casts = ['expense_date' => 'date', 'amount' => 'decimal:2'];
+
+    public function project() { return $this->belongsTo(Project::class); }
+    public function recordedBy() { return $this->belongsTo(User::class, 'recorded_by'); }
+}
+```
+
+#### [MODIFY] [app/Models/Project.php](file:///Users/Ahmadx/Downloads/archillery/app/Models/Project.php)
+```php
+public function expenses(): HasMany {
+    return $this->hasMany(ProjectExpense::class);
+}
+```
+
+**Example Queries & Controller Logic**
+#### [MODIFY] [app/Services/ReportService.php](file:///Users/Ahmadx/Downloads/archillery/app/Services/ReportService.php)
+In [generateProjectSummaryReport](file:///Users/Ahmadx/Downloads/archillery/app/Services/ReportService.php#55-201), aggregate expenses alongside procurement data:
+```php
+// Fetch project expenses within date range
+$expenses = $project->expenses()
+    ->whereBetween('expense_date', [$startDate, $endDate])
+    ->get();
+
+$expenseBreakdown = $expenses->groupBy('expense_type')->map(function ($group) {
+    return [
+        'count' => $group->count(),
+        'total_value' => $group->sum('amount')
+    ];
+});
+
+$totalProjectSpending = $stats['total_value'] + $expenses->sum('amount');
+// Pass $expenses, $expenseBreakdown, and $totalProjectSpending data to the view.
+```
+
+**Blade UI Changes**
+#### [MODIFY] [resources/views/reports/project-summary.blade.php](file:///Users/Ahmadx/Downloads/archillery/resources/views/reports/project-summary.blade.php)
+Add an "Other Project Expenses" table listing artisan payments and miscellaneous costs. Update the "Total Project Spending" aggregate to include both `Total Procurement Value` and `Total Other Expenses`.
+
+---
+
+### 2. Payment Receipt Upload During Director Approval
+
+**Database Constraints & Migrations**
+Since one procurement request can have multiple materials from different vendors, the system needs to support multiple receipts per request.
+
+#### [NEW] `database/migrations/xxxx_xx_xx_xxxxxx_create_payment_receipts_table.php`
+```php
+Schema::create('payment_receipts', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('procurement_request_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('uploaded_by')->constrained('users');
+    $table->foreignId('vendor_id')->nullable()->constrained('vendors'); // Optional tag for specific vendor
+    $table->string('file_path');
+    $table->string('original_filename');
+    $table->decimal('amount', 15, 2)->nullable();
+    $table->timestamps();
+});
+```
+
+**Model Relationships Updates**
+#### [NEW] [app/Models/PaymentReceipt.php](file:///Users/Ahmadx/Downloads/archillery/app/Models/PaymentReceipt.php)
+```php
+class PaymentReceipt extends Model {
+    protected $fillable = ['procurement_request_id', 'uploaded_by', 'vendor_id', 'file_path', 'original_filename', 'amount'];
+    public function procurementRequest() { return $this->belongsTo(ProcurementRequest::class); }
+    public function uploadedBy() { return $this->belongsTo(User::class, 'uploaded_by'); }
+}
+```
+
+#### [MODIFY] [app/Models/ProcurementRequest.php](file:///Users/Ahmadx/Downloads/archillery/app/Models/ProcurementRequest.php)
+```php
+public function paymentReceipts(): HasMany {
+    return $this->hasMany(PaymentReceipt::class);
+}
+```
+
+**File Storage Strategy & Controller Logic**
+*   **Storage Disk**: Use `local` disk (`storage/app/receipts`). Avoid the `public` disk to prevent unauthorized direct access to financial documents.
+*   **Upload Logic**: In `ApprovalController::approve()`:
+
+#### [MODIFY] `app/Http/Controllers/ApprovalController.php`
+```php
+public function approve(Request $httpRequest, ProcurementRequest $request) {
+    // ... authorization checks ...
+    $validated = $httpRequest->validate([
+        'comments' => 'nullable|string',
+        'receipts.*' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120', // Max 5MB per file
+    ]);
+
+    DB::transaction(function () use ($request, $user, $validated, $httpRequest) {
+        $this->procurementService->approveRequest($request, $user, $validated['comments'] ?? null);
+
+        if ($httpRequest->hasFile('receipts')) {
+            foreach ($httpRequest->file('receipts') as $file) {
+                $path = $file->store('receipts', 'local');
+                $request->paymentReceipts()->create([
+                    'uploaded_by' => $user->id,
+                    'file_path' => $path,
+                    'original_filename' => $file->getClientOriginalName(),
+                ]);
+            }
+        }
+    });
+    // ... redirection ...
+}
+```
+
+**Secure File Access**
+#### [NEW] `app/Http/Controllers/ReceiptController.php`
+```php
+public function download(PaymentReceipt $receipt) {
+    // Ensure user has valid business permission to view this project's financials
+    if (!Auth::user()->can('view', $receipt->procurementRequest)) {
+        abort(403, 'Unauthorized access to payment receipt.');
+    }
+    return Storage::disk('local')->download($receipt->file_path, $receipt->original_filename);
+}
+```
+
+#### [MODIFY] `routes/web.php`
+```php
+Route::get('/receipts/{receipt}/download', [ReceiptController::class, 'download'])->name('receipts.download');
+```
+
+**Blade UI Changes**
+*   **Upload Form**: Modify the approval modal inside `director-queue.blade.php` to include `<input type="file" name="receipts[]" multiple accept=".pdf,.jpeg,.png,.jpg">` and ensure the form has `enctype="multipart/form-data"`.
+*   **Receipt Display**: In the Procurement Request detailed view, add a "Payment Proofs / Receipts" section that loops through `$request->paymentReceipts` and provides a secure download link.
+
+## Phase 4: UI Enhancements (User Feedback)
+
+#### [MODIFY] `app/Http/Controllers/ProjectController.php`
+- Update `show` method: Calculate project `$stats['spent_amount']` inclusive of `ProjectExpense` records spanning the project.
+- Add `storeExpense(Request $request, Project $project)` to handle incoming `expense_type`, `amount`, `description`, etc., creating new `ProjectExpense` records linked to the project.
+
+#### [MODIFY] `resources/views/projects/show.blade.php`
+- Add a new table block beneath "Procurement Activity" to render `$project->expenses()`.
+- Implement an 'Add Expense' button triggering a modal form posting to the new `storeExpense` route, listing the DB enum fields (`artisan_payment`, `miscellaneous`, `extra_fee`, `other`).
+- Ensure the Budget Utilization progress bar and cards accurately output the mixed spent amount (Procurement + Direct Project Expenses).
+
+#### [MODIFY] `app/Http/Controllers/ReceiptController.php` & `routes/web.php`
+- Add a `store` method to handle ad-hoc receipt uploading attached directly to a `ProcurementRequest`.
+- Register `POST /requests/{request}/receipts` route.
+
+#### [MODIFY] `resources/views/requests/show.blade.php`
+- Reposition current Payment Receipts block beneath the "Requested Items" table.
+- Style the receipt grid to match the "Files/Attachments" styling used in `projects.show` (card grids with visual icons/previews).
+- Add an 'Upload Receipt' button & modal form targeting the new `ReceiptController@store`. Include a `<select name="vendor_id">` input dynamically restricted to the unique vendors existing in `$request->items` to explicitly tag receipts to a specific vendor payment.
+
+## Verification Plan
+
+### Automated / Backend Verification
+1.  Run `php artisan make:migration` to ensure both `project_expenses` and `payment_receipts` tables migrate properly.
+2.  Seed dummy data into `project_expenses` for testing.
+3.  Ensure `ReportService->generateProjectSummaryReport()` query logic properly merges procurement expenses and outside expenses without N+1 query problems.
+
+### Manual Verification
+1.  **Reporting**: Generate a large project's report PDF and visually verify that Artisan Payments and Miscellaneous expenses appear in the breakdown.
+2.  **Upload Feature**: Log in as a Director, approve a pending request, and attach two test files (e.g. PDF and JPG).
+3.  **Viewing Feature**: Log out and log in as an unauthorized user, attempt to visit the receipt download route directly to test that the 403 Forbidden intercept acts correctly. Next, log in as an authorized user and confirm the download works gracefully.

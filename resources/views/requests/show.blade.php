@@ -269,10 +269,109 @@ $RequestStatus = App\Enums\RequestStatus::class;
                         </div>
                     </div>
                 </div>
+
+                <!-- Payment Receipts -->
+                <div class="card mt-4">
+                    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">Payment Receipts</h4>
+                        @if(auth()->user()->can('update', $request) || auth()->user()->hasPermission('process-purchase-request'))
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadReceiptModal">
+                            <i class="bi bi-upload me-1"></i> Upload Receipt
+                        </button>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        @if($request->paymentReceipts && $request->paymentReceipts->count() > 0)
+                        <div class="row g-3">
+                            @foreach($request->paymentReceipts as $receipt)
+                            <div class="col-md-4 mb-3">
+                                <div class="card border h-100">
+                                    @if(preg_match('/\.(jpg|jpeg|png)$/i', $receipt->file_path))
+                                    <div style="height: 120px; overflow: hidden; background-color: #f8f9fa;"
+                                        class="d-flex align-items-center justify-content-center">
+                                        <a href="{{ route('receipts.download', $receipt) }}" target="_blank">
+                                            <i class="bi bi-image text-primary" style="font-size: 3rem;"></i>
+                                        </a>
+                                    </div>
+                                    @else
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                                        style="height: 120px;">
+                                        <a href="{{ route('receipts.download', $receipt) }}" target="_blank">
+                                            <i class="bi bi-file-pdf text-danger" style="font-size: 3rem;"></i>
+                                        </a>
+                                    </div>
+                                    @endif
+                                    <div class="card-body p-2">
+                                        <p class="mb-1 small text-truncate fw-bold" title="{{ $receipt->original_filename }}">
+                                            {{ $receipt->original_filename }}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                            <small class="text-muted d-block text-truncate" style="max-width: 120px;" title="{{ $receipt->vendor ? $receipt->vendor->name : 'No vendor' }}">
+                                                <i class="bi bi-shop me-1"></i>{{ $receipt->vendor ? $receipt->vendor->name : 'No vendor' }}
+                                            </small>
+                                            <a href="{{ route('receipts.download', $receipt) }}" target="_blank"
+                                                class="btn btn-xs btn-outline-primary" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <div class="text-center text-muted small py-3">No receipts uploaded yet</div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Upload Receipt Modal -->
+@if(auth()->user()->can('update', $request) || auth()->user()->hasPermission('process-purchase-request'))
+<div class="modal fade" id="uploadReceiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('requests.receipts.store', $request) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Payment Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Vendor <span class="text-danger">*</span></label>
+                        <select name="vendor_id" class="form-select" required>
+                            <option value="">Select Vendor...</option>
+                            @php
+                                $requestVendors = collect();
+                                if($request->items) {
+                                    $requestVendors = $request->items->pluck('vendor')->filter()->unique('id');
+                                }
+                            @endphp
+                            @foreach($requestVendors as $vendor)
+                                <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Select the vendor this payment was made to.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Receipt Files <span class="text-danger">*</span></label>
+                        <input type="file" name="receipts[]" class="form-control" multiple accept=".pdf,.jpeg,.png,.jpg" required>
+                        <div class="form-text">Max size 5MB per file. You can select multiple files.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload Receipts</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 
 <style>
 .timeline {

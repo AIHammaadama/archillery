@@ -18,7 +18,7 @@ class AdminUserSeeder extends Seeder
      */
     public function run()
     {
-        $role = Role::where('slug', 'super-admin')->first();
+        $role = Role::where('slug', 'super_admin')->first();
 
         $user = User::firstOrCreate(
             ['email' => 'admin@ppms.local'],

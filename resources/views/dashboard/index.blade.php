@@ -8,8 +8,8 @@
         <!-- Welcome Header -->
         <div class="form-head d-flex mb-4 align-items-start">
             <div class="mr-auto">
-                <h3 class="text-orange font-w600">Welcome to {{ config('app.short_name') }}, <span
-                        class="text-orange">{{ Auth::user()->firstname. ' ' .Auth::user()->lastname }}!</span></h3>
+                <h3 class="text-danger font-w400">Welcome to {{ config('app.short_name') }}, <span
+                        class="text-danger">{{ Auth::user()->firstname. ' ' .Auth::user()->lastname }}!</span></h3>
                 <p class="text-muted mb-0">
                     @if($user->hasRole('site_manager'))
                     Manage your project requests and track procurement status
@@ -475,153 +475,153 @@
 @if(isset($dashboardData['charts']))
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Trends Chart
-    @if(isset($dashboardData['charts']['request_trends']))
-    const trendsData = @json($dashboardData['charts']['request_trends']);
-    const trendsCtx = document.getElementById('trendsChart');
-    if (trendsCtx) {
-        new Chart(trendsCtx, {
-            type: 'line',
-            data: {
-                labels: trendsData.labels,
-                datasets: [{
-                    label: 'Requests',
-                    data: trendsData.data,
-                    borderColor: 'rgba(124, 58, 237, 0.8)',
-                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Trends Chart
+        @if(isset($dashboardData['charts']['request_trends']))
+        const trendsData = @json($dashboardData['charts']['request_trends']);
+        const trendsCtx = document.getElementById('trendsChart');
+        if (trendsCtx) {
+            new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: trendsData.labels,
+                    datasets: [{
+                        label: 'Requests',
+                        data: trendsData.data,
+                        borderColor: 'rgba(124, 58, 237, 0.8)',
+                        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
                         }
                     }
                 }
-            }
-        });
-    }
-    @elseif(isset($dashboardData['charts']['monthly_trends']))
-    const monthlyData = @json($dashboardData['charts']['monthly_trends']);
-    const trendsCtx = document.getElementById('trendsChart');
-    if (trendsCtx) {
-        new Chart(trendsCtx, {
-            type: 'bar',
-            data: {
-                labels: monthlyData.labels,
-                datasets: [{
-                    label: 'Requests',
-                    data: monthlyData.requests,
-                    backgroundColor: 'rgba(124, 58, 237, 0.8)',
-                    borderColor: 'rgb(124, 58, 237)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+            });
+        }
+        @elseif(isset($dashboardData['charts']['monthly_trends']))
+        const monthlyData = @json($dashboardData['charts']['monthly_trends']);
+        const trendsCtx = document.getElementById('trendsChart');
+        if (trendsCtx) {
+            new Chart(trendsCtx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.labels,
+                    datasets: [{
+                        label: 'Requests',
+                        data: monthlyData.requests,
+                        backgroundColor: 'rgba(124, 58, 237, 0.8)',
+                        borderColor: 'rgb(124, 58, 237)',
+                        borderWidth: 1
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
                         }
                     }
                 }
-            }
-        });
-    }
-    @endif
+            });
+        }
+        @endif
 
-    // Distribution / Vendor Chart
-    @if(isset($dashboardData['charts']['vendor_engagement']))
-    const vendorData = @json($dashboardData['charts']['vendor_engagement']);
-    const distCtx = document.getElementById('distributionChart');
-    if (distCtx) {
-        new Chart(distCtx, {
-            type: 'bar',
-            data: {
-                labels: vendorData.labels,
-                datasets: [{
-                    label: 'Transactions',
-                    data: vendorData.data,
-                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                    borderColor: 'rgb(16, 185, 129)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        // Distribution / Vendor Chart
+        @if(isset($dashboardData['charts']['vendor_engagement']))
+        const vendorData = @json($dashboardData['charts']['vendor_engagement']);
+        const distCtx = document.getElementById('distributionChart');
+        if (distCtx) {
+            new Chart(distCtx, {
+                type: 'bar',
+                data: {
+                    labels: vendorData.labels,
+                    datasets: [{
+                        label: 'Transactions',
+                        data: vendorData.data,
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        borderWidth: 1
+                    }]
                 },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
                         }
                     }
                 }
-            }
-        });
-    }
-    @elseif(isset($dashboardData['charts']['status_distribution']))
-    const statusData = @json($dashboardData['charts']['status_distribution']);
-    const distCtx = document.getElementById('distributionChart');
-    if (distCtx) {
-        new Chart(distCtx, {
-            type: 'doughnut',
-            data: {
-                labels: statusData.labels,
-                datasets: [{
-                    data: statusData.data,
-                    backgroundColor: [
-                        'rgba(124, 58, 237, 0.8)',
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(6, 182, 212, 0.8)',
-                        'rgba(107, 114, 128, 0.8)'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+            });
+        }
+        @elseif(isset($dashboardData['charts']['status_distribution']))
+        const statusData = @json($dashboardData['charts']['status_distribution']);
+        const distCtx = document.getElementById('distributionChart');
+        if (distCtx) {
+            new Chart(distCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusData.labels,
+                    datasets: [{
+                        data: statusData.data,
+                        backgroundColor: [
+                            'rgba(124, 58, 237, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(6, 182, 212, 0.8)',
+                            'rgba(107, 114, 128, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
                     }
                 }
-            }
-        });
-    }
-    @endif
-});
+            });
+        }
+        @endif
+    });
 </script>
 @endif
 @endsection

@@ -157,9 +157,11 @@ class ApprovalController extends Controller
         }
 
         $validated = $httpRequest->validate([
-            'comments' => 'nullable|string'
+            'comments' => 'nullable|string',
+            'receipts.*' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
         ]);
 
+        DB::beginTransaction();
         try {
             $this->procurementService->approveRequest(
                 $request,
@@ -167,9 +169,23 @@ class ApprovalController extends Controller
                 $validated['comments'] ?? null
             );
 
+            if ($httpRequest->hasFile('receipts')) {
+                foreach ($httpRequest->file('receipts') as $file) {
+                    $path = $file->store('receipts', 'local');
+                    $request->paymentReceipts()->create([
+                        'uploaded_by' => $user->id,
+                        'file_path' => $path,
+                        'original_filename' => $file->getClientOriginalName(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
             return redirect()->route('approvals.director-queue')
                 ->with('success', 'Request approved successfully.');
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->with('error', 'Failed to approve: ' . $e->getMessage());
         }
     }

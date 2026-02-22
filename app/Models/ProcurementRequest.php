@@ -89,6 +89,11 @@ class ProcurementRequest extends Model implements Auditable
         return $this->hasMany(Delivery::class, 'request_id');
     }
 
+    public function paymentReceipts(): HasMany
+    {
+        return $this->hasMany(PaymentReceipt::class, 'procurement_request_id');
+    }
+
     // Helper methods
     public function isEditable(): bool
     {

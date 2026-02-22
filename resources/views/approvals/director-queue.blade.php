@@ -175,7 +175,7 @@
                                         <div class="modal show d-block" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form action="{{ route('approvals.approve', $req) }}" method="POST">
+                                                    <form action="{{ route('approvals.approve', $req) }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Approve Request</h5>
@@ -189,6 +189,11 @@
                                                                 <label class="form-label">Comments (Optional)</label>
                                                                 <textarea name="comments" class="form-control" rows="3"
                                                                     placeholder="Add any comments..."></textarea>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Payment Receipts (Optional)</label>
+                                                                <input type="file" name="receipts[]" class="form-control" multiple accept=".pdf,.jpeg,.jpg,.png">
+                                                                <div class="form-text">Upload proof of payment (images or PDF). Max 5MB per file.</div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">

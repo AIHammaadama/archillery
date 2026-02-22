@@ -61,6 +61,11 @@ class Project extends Model implements Auditable
         return $this->hasMany(ProcurementRequest::class);
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(ProjectExpense::class);
+    }
+
     // Helper method to check if user is assigned to project
     public function isAssignedTo(User $user, ?string $roleType = null): bool
     {

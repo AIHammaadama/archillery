@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\ProjectExpense;
 use App\Models\User;
 use App\Models\State;
 use App\Models\Lga;
@@ -227,7 +228,7 @@ class ProjectController extends Controller
             'total_requests' => $project->procurementRequests->count(),
             'pending_requests' => $project->procurementRequests->whereIn('status', $pendingStatuses)->count(),
             'approved_requests' => $project->procurementRequests->whereIn('status', $approvedStatuses)->count(),
-            'spent_amount' => $project->procurementRequests->whereIn('status', $approvedStatuses)->sum('total_quoted_amount'),
+            'spent_amount' => $project->procurementRequests->whereIn('status', $approvedStatuses)->sum('total_quoted_amount') + $project->expenses()->sum('amount'),
             'budget_percentage' => 0
         ];
 
@@ -557,5 +558,82 @@ class ProjectController extends Controller
         $project->update(['attachments' => $attachments]);
 
         return true;
+    }
+    /**
+     * Store a new project expense directly
+     */
+    public function storeExpense(Request $request, Project $project)
+    {
+        // Allow creating expenses if user can update the project or view request pricing
+        if (!$request->user()->can('update', $project) && !$request->user()->hasPermission('view-request-pricing')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'expense_type' => 'required|in:artisan_payment,miscellaneous,extra_fee,other',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'required|string|max:255',
+            'expense_date' => 'required|date',
+            'receipt' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $path = null;
+            if ($request->hasFile('receipt')) {
+                $path = $request->file('receipt')->store('receipts', 'local');
+            }
+
+            $project->expenses()->create([
+                'recorded_by' => Auth::id(),
+                'expense_type' => $validated['expense_type'],
+                'amount' => $validated['amount'],
+                'description' => $validated['description'],
+                'expense_date' => $validated['expense_date'],
+                'receipt_path' => $path,
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Project expense added successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Failed to add expense: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Secure view project expense receipt
+     */
+    public function viewExpenseReceipt(ProjectExpense $expense)
+    {
+        $this->authorize('view', $expense->project);
+
+        if (!$expense->receipt_path || !Storage::disk('local')->exists($expense->receipt_path)) {
+            abort(404, 'Receipt not found on server.');
+        }
+
+        return Storage::disk('local')->response($expense->receipt_path);
+    }
+
+    /**
+     * Secure view project attachment
+     */
+    public function viewAttachment(Project $project, int $index)
+    {
+        $this->authorize('view', $project);
+
+        $attachments = $project->attachments ?? [];
+        if (!isset($attachments[$index])) {
+            abort(404, 'Attachment not found.');
+        }
+
+        $path = $attachments[$index]['path'];
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404, 'File not found on server.');
+        }
+
+        return Storage::disk('public')->response($path);
     }
 }

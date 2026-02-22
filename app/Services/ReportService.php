@@ -79,6 +79,18 @@ class ReportService
             ->with(['items.material', 'items.vendor', 'requestedBy'])
             ->get();
 
+        // Fetch project expenses within date range
+        $expenses = $project->expenses()
+            ->whereBetween('expense_date', [$startDate, $endDate])
+            ->get();
+
+        $expenseBreakdown = $expenses->groupBy('expense_type')->map(function ($group) {
+            return [
+                'count' => $group->count(),
+                'total_value' => $group->sum('amount')
+            ];
+        });
+
         // Calculate statistics
         $stats = [
 
@@ -101,6 +113,8 @@ class ReportService
             ])->count(),
 
             'total_value' => $requests->sum('total_quoted_amount'),
+            
+            'total_project_spending' => $requests->sum('total_quoted_amount') + $expenses->sum('amount'),
 
         ];
 
@@ -166,6 +180,8 @@ class ReportService
             'statusBreakdown' => $statusBreakdown,
             'vendorBreakdown' => $vendorBreakdown,
             'materialBreakdown' => $materialBreakdown,
+            'expenses' => $expenses,
+            'expenseBreakdown' => $expenseBreakdown,
             'canViewPricing' => $canViewPricing,
             'generatedAt' => now(),
             'generatedBy' => Auth::user(),

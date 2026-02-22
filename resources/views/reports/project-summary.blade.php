@@ -199,9 +199,17 @@
 
         @if($canViewPricing)
         <div class="stats-grid" style="margin-bottom: 15px;">
-            <div class="stat-box" style="width: 100%;">
+            <div class="stat-box" style="width: 33%;">
                 <span class="stat-value">₦{{ number_format($stats['total_value'], 2) }}</span>
                 <span class="stat-label">Total Procurement Value</span>
+            </div>
+            <div class="stat-box" style="width: 33%;">
+                <span class="stat-value">₦{{ number_format($expenses->sum('amount'), 2) }}</span>
+                <span class="stat-label">Total Other Expenses</span>
+            </div>
+            <div class="stat-box" style="width: 34%;">
+                <span class="stat-value">₦{{ number_format($stats['total_project_spending'], 2) }}</span>
+                <span class="stat-label">Total Project Spending</span>
             </div>
         </div>
         @endif
@@ -285,6 +293,29 @@
                 @foreach($vendorBreakdown as $vendorName => $data)
                 <tr>
                     <td>{{ $vendorName }}</td>
+                    <td class="text-center">{{ $data['count'] }}</td>
+                    <td class="text-right">₦{{ number_format($data['total_value'], 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        @endif
+
+        <!-- Other Project Expenses -->
+        @if($canViewPricing && count($expenseBreakdown) > 0)
+        <div class="section-title">Other Project Expenses</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Expense Type</th>
+                    <th style="width: 25%; text-align: center;">Transaction Count</th>
+                    <th style="width: 25%; text-align: right;">Total Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($expenseBreakdown as $expenseType => $data)
+                <tr>
+                    <td>{{ ucwords(str_replace('_', ' ', $expenseType)) }}</td>
                     <td class="text-center">{{ $data['count'] }}</td>
                     <td class="text-right">₦{{ number_format($data['total_value'], 2) }}</td>
                 </tr>

@@ -225,6 +225,71 @@
                         @endif
                     </div>
                 </div>
+
+                <!-- Other Project Expenses Table -->
+                @if(auth()->user()->hasPermission('view-request-pricing'))
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+                        <h4 class="card-title mb-0">Other Expenses</h4>
+                        @if(auth()->user()->can('update', $project) || auth()->user()->hasPermission('view-request-pricing'))
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addExpenseModal">
+                            <i class="bi bi-plus-circle me-1"></i> Add Expense
+                        </button>
+                        @endif
+                    </div>
+                    <div class="card-body p-0">
+                        @if($project->expenses && $project->expenses->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <strong class="bg-light">
+                                    <tr>
+                                        <th class="border-top-0">Date</th>
+                                        <th class="border-top-0">Type</th>
+                                        <th class="border-top-0">Description</th>
+                                        <th class="border-top-0">Added By</th>
+                                        <th class="border-top-0 text-end">Amount</th>
+                                        <th class="border-top-0 text-center">Receipt</th>
+                                    </tr>
+                                </strong>
+                                <tbody>
+                                    @foreach($project->expenses->sortByDesc('expense_date') as $expense)
+                                    <tr>
+                                        <td>{{ $expense->expense_date->format('M d, Y') }}</td>
+                                        <td>
+                                            <span class="badge badge-subtle-secondary text-secondary">
+                                                {{ ucwords(str_replace('_', ' ', $expense->expense_type)) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ Str::limit($expense->description, 30) }}</td>
+                                        <td>
+                                            <small>{{ optional($expense->recordedBy)->firstname ?? 'N/A' }}</small>
+                                        </td>
+                                        <td class="text-end fw-bold">₦{{ number_format($expense->amount, 2) }}</td>
+                                        <td class="text-center">
+                                            @if($expense->receipt_path)
+                                            <a href="{{ route('projects.expenses.receipt.view', $expense) }}" target="_blank"
+                                                class="btn btn-xs btn-outline-info" title="View Receipt">
+                                                <i class="bi bi-file-earmark-text"></i>
+                                            </a>
+                                            @else
+                                            <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        @else
+                        <div class="text-center py-4">
+                            <i class="bi bi-receipt display-6 text-muted"></i>
+                            <p class="mt-2 text-muted">No additional project expenses recorded</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
             </div>
 
             <!-- Right Column: Info & Team -->
@@ -277,7 +342,7 @@
                         </div>
                         <div class="mb-0">
                             <label class="text-muted small">Description</label>
-                            <p class="small mb-0">{{ Str::limit($project->description ?? 'No description.', 150) }}</p>
+                            <p class="small mb-0">{{ $project->description ?? 'No description.' }}</p>
                         </div>
                     </div>
                 </div>
@@ -339,7 +404,7 @@
                                     @if(str_starts_with($attachment['type'] ?? '', 'image/'))
                                     <div style="height: 150px; overflow: hidden; background-color: #f8f9fa;"
                                         class="d-flex align-items-center justify-content-center">
-                                        <img src="{{ Storage::url($attachment['path']) }}" class="card-img-top"
+                                        <img src="{{ route('projects.attachment.view', ['project' => $project, 'index' => $index]) }}" class="card-img-top"
                                             alt="{{ $attachment['original_name'] }}"
                                             style="width: 100%; height: 100%; object-fit: cover;">
                                     </div>
@@ -360,7 +425,7 @@
                                                 KB</small>
 
                                             <div class="btn-group">
-                                                <a href="{{ Storage::url($attachment['path']) }}" target="_blank"
+                                                <a href="{{ route('projects.attachment.view', ['project' => $project, 'index' => $index]) }}" target="_blank"
                                                     class="btn btn-xs btn-outline-primary" title="View">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
@@ -390,6 +455,57 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Expense Modal -->
+<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('projects.expenses.store', $project) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Record Project Expense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Expense Type <span class="text-danger">*</span></label>
+                        <select name="expense_type" class="form-select" required>
+                            <option value="">Select Type...</option>
+                            <option value="artisan_payment">Artisan Payment</option>
+                            <option value="miscellaneous">Miscellaneous</option>
+                            <option value="extra_fee">Extra Fee</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount (₦) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" name="amount" class="form-control" required
+                            placeholder="Enter amount">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Expense Date <span class="text-danger">*</span></label>
+                        <input type="date" name="expense_date" class="form-control" required
+                            max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description <span class="text-danger">*</span></label>
+                        <textarea name="description" class="form-control" rows="2" required
+                            placeholder="Brief description of the expense"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Receipt/Proof (Optional)</label>
+                        <input type="file" name="receipt" class="form-control" accept=".pdf,.jpeg,.png,.jpg">
+                        <div class="form-text">Max size 5MB</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Expense</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
