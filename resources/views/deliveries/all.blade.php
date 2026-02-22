@@ -180,7 +180,7 @@
                                             @if(auth()->user()->hasPermission('record-deliveries'))
                                             <a href="{{ route('deliveries.create', $request) }}"
                                                 class="btn btn-sm btn-primary" title="Record Delivery">
-                                                <i class="bi bi-plus-circle"></i>
+                                                <i class="bi bi-plus-circle"></i> Record Delivery
                                             </a>
                                             @endif
                                         </td>

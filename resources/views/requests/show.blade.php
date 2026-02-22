@@ -197,7 +197,10 @@ $RequestStatus = App\Enums\RequestStatus::class;
                                         @endif
                                         <th>Remarks</th>
                                         <th>Status</th>
+                                        @if(request()->status === $RequestStatus::APPROVED &&
+                                        auth()->user()->hasPermission('record-deliveries'))
                                         <th>Actions</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -251,6 +254,8 @@ $RequestStatus = App\Enums\RequestStatus::class;
                                             <span class="badge bg-secondary">Pending</span>
                                             @endif
                                         </td>
+                                        @if(request()->status === $RequestStatus::APPROVED &&
+                                        auth()->user()->hasPermission('record-deliveries'))
                                         <td>
                                             @if(
                                             auth()->user()->hasPermission('record-deliveries') &&
@@ -258,10 +263,11 @@ $RequestStatus = App\Enums\RequestStatus::class;
                                             )
                                             <a href="{{ route('deliveries.create', $request) }}"
                                                 class="btn btn-sm btn-primary" title="Record Delivery">
-                                                <i class="bi bi-plus-circle"></i>
+                                                <i class="bi bi-plus-circle"></i> Record Delivery
                                             </a>
                                             @endif
                                         </td>
+                                        @endif
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -271,11 +277,14 @@ $RequestStatus = App\Enums\RequestStatus::class;
                 </div>
 
                 <!-- Payment Receipts -->
+                @if($canViewPricing)
                 <div class="card mt-4">
                     <div class="card-header border-bottom d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">Payment Receipts</h4>
-                        @if(auth()->user()->can('update', $request) || auth()->user()->hasPermission('process-purchase-request'))
-                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadReceiptModal">
+                        @if(auth()->user()->can('update', $request) ||
+                        auth()->user()->hasPermission('process-purchase-request'))
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#uploadReceiptModal">
                             <i class="bi bi-upload me-1"></i> Upload Receipt
                         </button>
                         @endif
@@ -302,12 +311,15 @@ $RequestStatus = App\Enums\RequestStatus::class;
                                     </div>
                                     @endif
                                     <div class="card-body p-2">
-                                        <p class="mb-1 small text-truncate fw-bold" title="{{ $receipt->original_filename }}">
+                                        <p class="mb-1 small text-truncate fw-bold"
+                                            title="{{ $receipt->original_filename }}">
                                             {{ $receipt->original_filename }}
                                         </p>
                                         <div class="d-flex justify-content-between align-items-center mt-2">
-                                            <small class="text-muted d-block text-truncate" style="max-width: 120px;" title="{{ $receipt->vendor ? $receipt->vendor->name : 'No vendor' }}">
-                                                <i class="bi bi-shop me-1"></i>{{ $receipt->vendor ? $receipt->vendor->name : 'No vendor' }}
+                                            <small class="text-muted d-block text-truncate" style="max-width: 120px;"
+                                                title="{{ $receipt->vendor ? $receipt->vendor->name : 'No vendor' }}">
+                                                <i
+                                                    class="bi bi-shop me-1"></i>{{ $receipt->vendor ? $receipt->vendor->name : 'No vendor' }}
                                             </small>
                                             <a href="{{ route('receipts.download', $receipt) }}" target="_blank"
                                                 class="btn btn-xs btn-outline-primary" title="View">
@@ -324,6 +336,7 @@ $RequestStatus = App\Enums\RequestStatus::class;
                         @endif
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>
@@ -346,20 +359,21 @@ $RequestStatus = App\Enums\RequestStatus::class;
                         <select name="vendor_id" class="form-select" required>
                             <option value="">Select Vendor...</option>
                             @php
-                                $requestVendors = collect();
-                                if($request->items) {
-                                    $requestVendors = $request->items->pluck('vendor')->filter()->unique('id');
-                                }
+                            $requestVendors = collect();
+                            if($request->items) {
+                            $requestVendors = $request->items->pluck('vendor')->filter()->unique('id');
+                            }
                             @endphp
                             @foreach($requestVendors as $vendor)
-                                <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                            <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
                             @endforeach
                         </select>
                         <div class="form-text">Select the vendor this payment was made to.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Receipt Files <span class="text-danger">*</span></label>
-                        <input type="file" name="receipts[]" class="form-control" multiple accept=".pdf,.jpeg,.png,.jpg" required>
+                        <input type="file" name="receipts[]" class="form-control" multiple accept=".pdf,.jpeg,.png,.jpg"
+                            required>
                         <div class="form-text">Max size 5MB per file. You can select multiple files.</div>
                     </div>
                 </div>
@@ -374,37 +388,37 @@ $RequestStatus = App\Enums\RequestStatus::class;
 @endif
 
 <style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
 
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--border-color);
-}
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border-color);
+    }
 
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
-}
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
 
-.timeline-marker {
-    position: absolute;
-    left: -26px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 3px solid var(--bg-card);
-}
+    .timeline-marker {
+        position: absolute;
+        left: -26px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid var(--bg-card);
+    }
 
-.timeline-content {
-    padding-left: 10px;
-}
+    .timeline-content {
+        padding-left: 10px;
+    }
 </style>
 @endsection
