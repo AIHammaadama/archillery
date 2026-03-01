@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Request {{ $request->request_number }}</title>
+        <title>Request <?php echo e($request->request_number); ?></title>
         <style>
         * {
             margin: 0;
@@ -224,7 +224,7 @@
     <body>
         <!-- Header -->
         <div class="header d-flex align-items-center" style="margin-bottom: 20px;">
-            <img src="{{ public_path('images/logo_report.png') }}" alt="Company Logo"
+            <img src="<?php echo e(public_path('images/logo_report.png')); ?>" alt="Company Logo"
                 style="height: 60px; margin-right: 15px; margin-bottom:15px;">
             <div>
                 <h1 style="margin: 0;">PROCUREMENT REQUEST</h1>
@@ -237,27 +237,27 @@
         <div class="info-grid">
             <div class="info-row">
                 <div class="info-label">Request Number:</div>
-                <div class="info-value text-bold">{{ $request->request_number }}</div>
+                <div class="info-value text-bold"><?php echo e($request->request_number); ?></div>
             </div>
             <div class="info-row">
                 <div class="info-label">Status:</div>
                 <div class="info-value">
-                    @if($request->status->value === 'approved')
+                    <?php if($request->status->value === 'approved'): ?>
                     <span class="status-badge status-approved">Approved</span>
-                    @elseif($request->status->value === 'rejected')
+                    <?php elseif($request->status->value === 'rejected'): ?>
                     <span class="status-badge status-rejected">Rejected</span>
-                    @else
-                    <span class="status-badge status-pending">{{ $request->status->label() }}</span>
-                    @endif
+                    <?php else: ?>
+                    <span class="status-badge status-pending"><?php echo e($request->status->label()); ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="info-row">
                 <div class="info-label">Request Date:</div>
-                <div class="info-value">{{ $request->request_date->format('F d, Y') }}</div>
+                <div class="info-value"><?php echo e($request->request_date->format('F d, Y')); ?></div>
             </div>
             <div class="info-row">
                 <div class="info-label">Required By:</div>
-                <div class="info-value">{{ $request->required_by_date->format('F d, Y') }}</div>
+                <div class="info-value"><?php echo e($request->required_by_date->format('F d, Y')); ?></div>
             </div>
         </div>
 
@@ -266,19 +266,19 @@
         <div class="info-grid">
             <div class="info-row">
                 <div class="info-label">Project Name:</div>
-                <div class="info-value">{{ $request->project->name }}</div>
+                <div class="info-value"><?php echo e($request->project->name); ?></div>
             </div>
             <div class="info-row">
                 <div class="info-label">Project Code:</div>
-                <div class="info-value">{{ $request->project->code }}</div>
+                <div class="info-value"><?php echo e($request->project->code); ?></div>
             </div>
             <div class="info-row">
                 <div class="info-label">Location:</div>
-                <div class="info-value">{{ collect([
+                <div class="info-value"><?php echo e(collect([
         $request->project->location,
         optional($request->project->lga)->lga,
         optional($request->project->state)->state,
-    ])->filter()->implode(', ') ?: 'Not specified' }}</div>
+    ])->filter()->implode(', ') ?: 'Not specified'); ?></div>
             </div>
         </div>
 
@@ -288,42 +288,46 @@
             <div class="info-row">
                 <div class="info-label">Requested By:</div>
                 <div class="info-value">
-                    @if($request->requestedBy)
-                    {{ $request->requestedBy->firstname }} {{ $request->requestedBy->lastname }}
-                    @else
+                    <?php if($request->requestedBy): ?>
+                    <?php echo e($request->requestedBy->firstname); ?> <?php echo e($request->requestedBy->lastname); ?>
+
+                    <?php else: ?>
                     N/A
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="info-row">
                 <div class="info-label">Procurement Officer:</div>
                 <div class="info-value">
-                    @if($request->procurementOfficer)
-                    {{ $request->procurementOfficer->firstname }} {{ $request->procurementOfficer->lastname }}
-                    @else
+                    <?php if($request->procurementOfficer): ?>
+                    <?php echo e($request->procurementOfficer->firstname); ?> <?php echo e($request->procurementOfficer->lastname); ?>
+
+                    <?php else: ?>
                     Not assigned
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
-            @if($request->approvedBy)
+            <?php if($request->approvedBy): ?>
             <div class="info-row">
                 <div class="info-label">Approved By:</div>
                 <div class="info-value">
-                    {{ $request->approvedBy->firstname }} {{ $request->approvedBy->lastname }}
+                    <?php echo e($request->approvedBy->firstname); ?> <?php echo e($request->approvedBy->lastname); ?>
+
                     <br><span
-                        style="font-size: 8pt; color: #666;">{{ $request->approved_at->format('F d, Y g:i A') }}</span>
+                        style="font-size: 8pt; color: #666;"><?php echo e($request->approved_at->format('F d, Y g:i A')); ?></span>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
 
         <!-- Justification -->
-        @if($request->justification)
+        <?php if($request->justification): ?>
         <div class="section-title">Justification</div>
         <p style="padding: 10px; background-color: #f9fafb; border-left: 3px solid #1abe68;">
-            {{ $request->justification }}
+            <?php echo e($request->justification); ?>
+
         </p>
-        @endif
+        <?php endif; ?>
         <br>
         <br>
         <br>
@@ -340,52 +344,54 @@
                     <th style="width: 35%;">Material</th>
                     <th style="width: 10%;">Quantity</th>
                     <th style="width: 10%;">Unit</th>
-                    @if($canViewPricing)
+                    <?php if($canViewPricing): ?>
                     <th style="width: 20%;">Vendor</th>
                     <th style="width: 10%; text-align: right;">Unit Price</th>
                     <th style="width: 10%; text-align: right;">Total</th>
-                    @endif
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
-                @foreach($request->items as $index => $item)
+                <?php $__currentLoopData = $request->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td><?php echo e($index + 1); ?></td>
                     <td>
-                        <strong>{{ $item->material->name }}</strong><br>
-                        <span style="font-size: 8pt; color: #666;">{{ $item->material->code }}</span>
+                        <strong><?php echo e($item->material->name); ?></strong><br>
+                        <span style="font-size: 8pt; color: #666;"><?php echo e($item->material->code); ?></span>
                     </td>
-                    <td>{{ number_format($item->quantity, 2) }}</td>
-                    <td>{{ $item->material->unit_of_measurement }}</td>
-                    @if($canViewPricing)
-                    <td>{{ $item->vendor ? $item->vendor->name : 'Not assigned' }}</td>
+                    <td><?php echo e(number_format($item->quantity, 2)); ?></td>
+                    <td><?php echo e($item->material->unit_of_measurement); ?></td>
+                    <?php if($canViewPricing): ?>
+                    <td><?php echo e($item->vendor ? $item->vendor->name : 'Not assigned'); ?></td>
                     <td class="text-right">
-                        @if($item->quoted_unit_price)
-                        ₦{{ number_format($item->quoted_unit_price, 2) }}
-                        @else
+                        <?php if($item->quoted_unit_price): ?>
+                        ₦<?php echo e(number_format($item->quoted_unit_price, 2)); ?>
+
+                        <?php else: ?>
                         -
-                        @endif
+                        <?php endif; ?>
                     </td>
                     <td class="text-right">
-                        @if($item->quoted_total_price)
-                        ₦{{ number_format($item->quoted_total_price, 2) }}
-                        @else
+                        <?php if($item->quoted_total_price): ?>
+                        ₦<?php echo e(number_format($item->quoted_total_price, 2)); ?>
+
+                        <?php else: ?>
                         -
-                        @endif
+                        <?php endif; ?>
                     </td>
-                    @endif
+                    <?php endif; ?>
                 </tr>
-                @endforeach
-                @if($canViewPricing)
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php if($canViewPricing): ?>
                 <tr class="total-row">
                     <td colspan="6" class="text-right">TOTAL:</td>
-                    <td class="text-right">₦{{ number_format($request->total_quoted_amount ?? 0, 2) }}</td>
+                    <td class="text-right">₦<?php echo e(number_format($request->total_quoted_amount ?? 0, 2)); ?></td>
                 </tr>
-                @endif
+                <?php endif; ?>
             </tbody>
         </table>
 
-        @php
+        <?php
         $vendorSummary = $request->items
         ->filter(fn($item) => $item->vendor_id) // only assigned vendors
         ->groupBy('vendor_id')
@@ -411,9 +417,9 @@
         ];
         })
         ->values();
-        @endphp
+        ?>
         <!-- Vendor Payment Summary -->
-        @if($canViewPricing)
+        <?php if($canViewPricing): ?>
         <div class="section-title" style="margin-top: 16px;">Vendor Payment Summary</div>
 
         <table class="items-table">
@@ -428,109 +434,120 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($vendorSummary as $row)
+                <?php $__empty_1 = true; $__currentLoopData = $vendorSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td>{{ $row['vendor_name'] }}</td>
+                    <td><?php echo e($row['vendor_name']); ?></td>
                     <td style="text-align:right;">
-                        ₦{{ number_format($row['total'], 2) }}
+                        ₦<?php echo e(number_format($row['total'], 2)); ?>
+
                     </td>
-                    <td>{{ $row['bank_name'] }}</td>
-                    <td>{{ $row['account_name'] }}</td>
-                    <td>{{ $row['account_number'] }}</td>
+                    <td><?php echo e($row['bank_name']); ?></td>
+                    <td><?php echo e($row['account_name']); ?></td>
+                    <td><?php echo e($row['account_number']); ?></td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="5" style="text-align:center; color:#666;">
                         No vendor assignments yet.
                     </td>
                 </tr>
-                @endforelse
+                <?php endif; ?>
 
-                @if($vendorSummary->count())
+                <?php if($vendorSummary->count()): ?>
                 <tr class="total-row">
                     <td class="text-right" colspan="1"><strong>GRAND TOTAL:</strong></td>
                     <td style="text-align:right;">
-                        <strong>₦{{ number_format($vendorSummary->sum('total'), 2) }}</strong>
+                        <strong>₦<?php echo e(number_format($vendorSummary->sum('total'), 2)); ?></strong>
                     </td>
                     <td colspan="3"></td>
                 </tr>
-                @endif
+                <?php endif; ?>
             </tbody>
         </table>
-        @endif
+        <?php endif; ?>
 
         <!-- Status History -->
-        @if($request->statusHistory && $request->statusHistory->count() > 0)
+        <?php if($request->statusHistory && $request->statusHistory->count() > 0): ?>
         <div class="section-title">Status History</div>
         <div class="timeline">
-            @foreach($request->statusHistory as $history)
+            <?php $__currentLoopData = $request->statusHistory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $history): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="timeline-item">
                 <div class="timeline-date">
-                    {{ optional($history->created_at)->format('M d, Y g:i A') ?? '—' }}
+                    <?php echo e(optional($history->created_at)->format('M d, Y g:i A') ?? '—'); ?>
+
                 </div>
                 <div class="timeline-user">
-                    {{ $history->changedBy->firstname ?? 'System' }} {{ $history->changedBy->lastname ?? '' }}
+                    <?php echo e($history->changedBy->firstname ?? 'System'); ?> <?php echo e($history->changedBy->lastname ?? ''); ?>
+
                 </div>
                 <div>
-                    Changed from <strong>{{ ucwords(str_replace('_', ' ', $history->from_status)) }}</strong>
-                    to <strong>{{ ucwords(str_replace('_', ' ', $history->to_status)) }}</strong>
+                    Changed from <strong><?php echo e(ucwords(str_replace('_', ' ', $history->from_status))); ?></strong>
+                    to <strong><?php echo e(ucwords(str_replace('_', ' ', $history->to_status))); ?></strong>
                 </div>
-                @if($history->comments)
-                <div class="timeline-comment">{{ $history->comments }}</div>
-                @endif
+                <?php if($history->comments): ?>
+                <div class="timeline-comment"><?php echo e($history->comments); ?></div>
+                <?php endif; ?>
             </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Remarks -->
-        @if($request->remarks)
+        <?php if($request->remarks): ?>
         <div class="section-title">Remarks</div>
         <p style="padding: 10px; background-color: #f9fafb; border-left: 3px solid #1abe68;">
-            {{ $request->remarks }}
+            <?php echo e($request->remarks); ?>
+
         </p>
-        @endif
+        <?php endif; ?>
 
         <!-- Rejection Reason -->
-        @if($request->rejection_reason)
+        <?php if($request->rejection_reason): ?>
         <div class="section-title">Rejection Reason</div>
         <p style="padding: 10px; background-color: #fee2e2; border-left: 3px solid #991b1b; color: #991b1b;">
-            {{ $request->rejection_reason }}
+            <?php echo e($request->rejection_reason); ?>
+
         </p>
-        @endif
+        <?php endif; ?>
 
         <!-- Signatures (only for approved requests) -->
-        @if($request->status->value === 'approved')
+        <?php if($request->status->value === 'approved'): ?>
         <div class="signatures">
             <div class="signature-block">
                 <div class="signature-line">
-                    {{ $request->requestedBy->firstname ?? '' }} {{ $request->requestedBy->lastname ?? '' }}
+                    <?php echo e($request->requestedBy->firstname ?? ''); ?> <?php echo e($request->requestedBy->lastname ?? ''); ?>
+
                 </div>
                 <div class="signature-label">Site Manager</div>
             </div>
             <div class="signature-block">
                 <div class="signature-line">
-                    {{ $request->procurementOfficer->firstname ?? '' }}
-                    {{ $request->procurementOfficer->lastname ?? '' }}
+                    <?php echo e($request->procurementOfficer->firstname ?? ''); ?>
+
+                    <?php echo e($request->procurementOfficer->lastname ?? ''); ?>
+
                 </div>
                 <div class="signature-label">Procurement Officer</div>
             </div>
             <div class="signature-block">
                 <div class="signature-line">
-                    {{ $request->approvedBy->firstname ?? '' }} {{ $request->approvedBy->lastname ?? '' }}
+                    <?php echo e($request->approvedBy->firstname ?? ''); ?> <?php echo e($request->approvedBy->lastname ?? ''); ?>
+
                 </div>
                 <div class="signature-label">Director</div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Footer -->
         <div class="footer">
-            Generated on {{ $generatedAt->format('F d, Y g:i A') }} by {{ $generatedBy->firstname }}
-            {{ $generatedBy->lastname }}
+            Generated on <?php echo e($generatedAt->format('F d, Y g:i A')); ?> by <?php echo e($generatedBy->firstname); ?>
+
+            <?php echo e($generatedBy->lastname); ?>
+
             <br>
             This is a system-generated document from the Project Procurement Management System
         </div>
     </body>
 
-</html>
+</html><?php /**PATH /Users/Ahmadx/Downloads/archillery/resources/views/reports/request-detail.blade.php ENDPATH**/ ?>

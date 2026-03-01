@@ -24,12 +24,12 @@
             text-align: center;
             margin-bottom: 15px;
             padding-bottom: 8px;
-            border-bottom: 3px solid #f46839;
+            border-bottom: 3px solid #1abe68;
         }
 
         .header h1 {
             font-size: 16pt;
-            color: #f46839;
+            color: #1abe68;
             margin-bottom: 3px;
         }
 
@@ -42,12 +42,12 @@
             background-color: #f3f4f6;
             padding: 10px;
             margin-bottom: 15px;
-            border-left: 4px solid #f46839;
+            border-left: 4px solid #1abe68;
         }
 
         .project-info h2 {
             font-size: 12pt;
-            color: #f46839;
+            color: #1abe68;
             margin-bottom: 5px;
         }
 
@@ -75,7 +75,7 @@
         .stat-value {
             font-size: 14pt;
             font-weight: bold;
-            color: #f46839;
+            color: #1abe68;
             display: block;
         }
 
@@ -93,8 +93,8 @@
             margin-bottom: 8px;
             font-weight: bold;
             font-size: 10pt;
-            color: #f46839;
-            border-left: 4px solid #f46839;
+            color: #1abe68;
+            border-left: 4px solid #1abe68;
         }
 
         table {
@@ -105,7 +105,7 @@
         }
 
         table th {
-            background-color: #f46839;
+            background-color: #1abe68;
             color: white;
             padding: 5px;
             text-align: left;

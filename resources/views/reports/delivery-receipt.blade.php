@@ -24,12 +24,12 @@
             text-align: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 3px solid #f46839;
+            border-bottom: 3px solid #1abe68;
         }
 
         .header h1 {
             font-size: 18pt;
-            color: #f46839;
+            color: #1abe68;
             margin-bottom: 5px;
         }
 
@@ -45,8 +45,8 @@
             margin-bottom: 10px;
             font-weight: bold;
             font-size: 11pt;
-            color: #f46839;
-            border-left: 4px solid #f46839;
+            color: #1abe68;
+            border-left: 4px solid #1abe68;
         }
 
         .info-grid {
@@ -106,7 +106,7 @@
 
         .material-box {
             background-color: #f9fafb;
-            border: 2px solid #f46839;
+            border: 2px solid #1abe68;
             padding: 15px;
             margin: 10px 0;
             text-align: center;
@@ -115,7 +115,7 @@
         .material-name {
             font-size: 14pt;
             font-weight: bold;
-            color: #f46839;
+            color: #1abe68;
             margin-bottom: 5px;
         }
 
@@ -126,7 +126,7 @@
 
         .quantity-box {
             background-color: #fff;
-            border: 2px dashed #f46839;
+            border: 2px dashed #1abe68;
             padding: 20px;
             margin: 10px 0;
             text-align: center;
@@ -142,7 +142,7 @@
         .quantity-value {
             font-size: 24pt;
             font-weight: bold;
-            color: #f46839;
+            color: #1abe68;
         }
 
         .quantity-unit {
