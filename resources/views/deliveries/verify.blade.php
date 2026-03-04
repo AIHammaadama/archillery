@@ -168,7 +168,7 @@
                         </div>
                         @endif
 
-                        <form action="{{ route('deliveries.process-verification', $delivery) }}" method="POST">
+                        <form action="{{ route('deliveries.process-verification', $delivery) }}" method="POST" class="ajax-form">
                             @csrf
 
                             <div class="mb-4">

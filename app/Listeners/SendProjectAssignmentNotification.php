@@ -12,8 +12,10 @@ class SendProjectAssignmentNotification
      */
     public function handle(ProjectAssigned $event): void
     {
-        $event->user->notify(
-            new ProjectAssignmentNotification($event->project, $event->roleType)
-        );
+        app()->terminating(function () use ($event) {
+            $event->user->notify(
+                new ProjectAssignmentNotification($event->project, $event->roleType)
+            );
+        });
     }
 }

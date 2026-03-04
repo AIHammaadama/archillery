@@ -118,7 +118,7 @@ $RequestStatus = App\Enums\RequestStatus::class;
                         @if($request->isEditable())
                         <hr>
                         <form action="{{ route('requests.submit', $request) }}" method="POST"
-                            onsubmit="return confirm('Submit this request for processing?');">
+                            onsubmit="return confirm('Submit this request for processing?');" class="ajax-form">
                             @csrf
                             <button type="submit" class="btn btn-success w-100">
                                 <i class="bi bi-send me-1"></i> Submit Request

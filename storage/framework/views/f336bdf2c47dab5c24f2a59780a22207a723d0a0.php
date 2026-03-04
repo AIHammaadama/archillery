@@ -121,7 +121,7 @@ $RequestStatus = App\Enums\RequestStatus::class;
                         <?php if($request->isEditable()): ?>
                         <hr>
                         <form action="<?php echo e(route('requests.submit', $request)); ?>" method="POST"
-                            onsubmit="return confirm('Submit this request for processing?');">
+                            onsubmit="return confirm('Submit this request for processing?');" class="ajax-form">
                             <?php echo csrf_field(); ?>
                             <button type="submit" class="btn btn-success w-100">
                                 <i class="bi bi-send me-1"></i> Submit Request

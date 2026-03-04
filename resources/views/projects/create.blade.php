@@ -52,7 +52,7 @@
                         <h4 class="card-title">Project Information</h4>
                     </div>
                     <div class="card-body" x-data="projectForm()">
-                        <form action="{{ route('projects.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('projects.store') }}" method="POST" enctype="multipart/form-data" class="ajax-form">
                             @csrf
 
                             <div class="row">

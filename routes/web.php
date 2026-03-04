@@ -339,5 +339,17 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/vendors/{vendor}/materials/{material}/price', [VendorController::class, 'getMaterialPrice'])
             ->name('api.vendors.material-price');
+
+        // Route to process the background queue via AJAX (Cron replacement)
+        Route::get('/run-queue', function () {
+            ignore_user_abort(true);
+            set_time_limit(0);
+            
+            \Illuminate\Support\Facades\Artisan::call('queue:work', [
+                '--stop-when-empty' => true,
+                '--timeout' => 60
+            ]);
+            return response()->json(['status' => 'processed']);
+        })->name('api.run-queue');
     });
 });

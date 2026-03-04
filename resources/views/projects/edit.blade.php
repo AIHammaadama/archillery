@@ -55,7 +55,7 @@
                     </div>
                     <div class="card-body" x-data="projectForm()">
                         <form action="{{ route('projects.update', $project) }}" method="POST"
-                            enctype="multipart/form-data">
+                            enctype="multipart/form-data" class="ajax-form">
                             @csrf
                             @method('PUT')
 

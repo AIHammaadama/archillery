@@ -166,10 +166,22 @@ class DeliveryController extends Controller
                 $user
             );
 
+            if ($httpRequest->wantsJson()) {
+                    session()->flash('success', 'Delivery recorded successfully.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Delivery recorded successfully.',
+                    'redirect' => route('deliveries.index', $request)
+                ]);
+            }
+
             return redirect()
                 ->route('deliveries.index', $request)
                 ->with('success', 'Delivery recorded successfully.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            if ($httpRequest->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Invalid request item.'], 422);
+            }
             return back()->with('error', 'Invalid request item.');
         }
     }
@@ -244,9 +256,21 @@ class DeliveryController extends Controller
                 $validated['quality_notes'] ?? null
             );
 
+            if ($request->wantsJson()) {
+                    session()->flash('success', 'Delivery verified successfully.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Delivery verified successfully.',
+                    'redirect' => route('deliveries.show', $delivery)
+                ]);
+            }
+
             return redirect()->route('deliveries.show', $delivery)
                 ->with('success', 'Delivery verified successfully.');
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to verify delivery: ' . $e->getMessage()], 422);
+            }
             return back()->with('error', 'Failed to verify delivery: ' . $e->getMessage());
         }
     }
@@ -347,9 +371,21 @@ class DeliveryController extends Controller
                 'site_manager_updated_at' => now(),
             ]);
 
+            if ($httpRequest->wantsJson()) {
+                    session()->flash('success', 'Delivery status updated successfully. Other stakeholders have been notified.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Delivery status updated successfully. Other stakeholders have been notified.',
+                    'redirect' => route('deliveries.show', $delivery)
+                ]);
+            }
+
             return redirect()->route('deliveries.show', $delivery)
                 ->with('success', 'Delivery status updated successfully. Other stakeholders have been notified.');
         } catch (\Exception $e) {
+            if ($httpRequest->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to update delivery status: ' . $e->getMessage()], 422);
+            }
             return back()->withInput()
                 ->with('error', 'Failed to update delivery status: ' . $e->getMessage());
         }

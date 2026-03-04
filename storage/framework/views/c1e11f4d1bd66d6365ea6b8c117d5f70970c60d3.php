@@ -186,7 +186,7 @@
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <form action="<?php echo e(route('approvals.approve', $req)); ?>" method="POST"
-                                                        enctype="multipart/form-data">
+                                                        enctype="multipart/form-data" class="ajax-form">
                                                         <?php echo csrf_field(); ?>
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Approve Request</h5>
@@ -220,7 +220,7 @@
                                         <div class="modal show d-block" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form action="<?php echo e(route('approvals.reject', $req)); ?>" method="POST">
+                                                    <form action="<?php echo e(route('approvals.reject', $req)); ?>" method="POST" class="ajax-form">
                                                         <?php echo csrf_field(); ?>
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Reject Request</h5>
@@ -257,7 +257,7 @@
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <form action="<?php echo e(route('approvals.send-back', $req)); ?>"
-                                                        method="POST">
+                                                        method="POST" class="ajax-form">
                                                         <?php echo csrf_field(); ?>
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Send Back for Revision</h5>

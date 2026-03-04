@@ -24,7 +24,9 @@ class SendRequestStatusNotification
 
         // Send notifications to each user
         foreach ($usersToNotify as $user) {
-            $user->notify(new RequestStatusNotification($request, $newStatus, $changedBy, $event->comments));
+            app()->terminating(function () use ($user, $request, $newStatus, $changedBy, $event) {
+                $user->notify(new RequestStatusNotification($request, $newStatus, $changedBy, $event->comments));
+            });
         }
     }
 

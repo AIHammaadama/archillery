@@ -105,7 +105,7 @@
                     </div>
                     <div class="card-body" x-data="deliveryForm()">
                         <form action="{{ route('deliveries.store', $request) }}" method="POST"
-                            enctype="multipart/form-data">
+                            enctype="multipart/form-data" class="ajax-form">
                             @csrf
 
                             <div class="row">

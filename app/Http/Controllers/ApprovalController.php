@@ -117,10 +117,22 @@ class ApprovalController extends Controller
 
             DB::commit();
 
+            if ($httpRequest->wantsJson()) {
+                session()->flash('success', 'Vendor assignments saved and submitted for approval.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vendor assignments saved and submitted for approval.',
+                    'redirect' => route('approvals.procurement-queue')
+                ]);
+            }
+
             return redirect()->route('approvals.procurement-queue')
                 ->with('success', 'Vendor assignments saved and submitted for approval.');
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($httpRequest->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to save assignments: ' . $e->getMessage()], 422);
+            }
             return back()->with('error', 'Failed to save assignments: ' . $e->getMessage());
         }
     }
@@ -182,10 +194,22 @@ class ApprovalController extends Controller
 
             DB::commit();
 
+            if ($httpRequest->wantsJson()) {
+                    session()->flash('success', 'Request approved successfully.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Request approved successfully.',
+                    'redirect' => route('approvals.director-queue')
+                ]);
+            }
+
             return redirect()->route('approvals.director-queue')
                 ->with('success', 'Request approved successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($httpRequest->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to approve: ' . $e->getMessage()], 422);
+            }
             return back()->with('error', 'Failed to approve: ' . $e->getMessage());
         }
     }
@@ -212,9 +236,21 @@ class ApprovalController extends Controller
                 $validated['reason']
             );
 
+            if ($httpRequest->wantsJson()) {
+                    session()->flash('success', 'Request rejected.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Request rejected.',
+                    'redirect' => route('approvals.director-queue')
+                ]);
+            }
+
             return redirect()->route('approvals.director-queue')
                 ->with('success', 'Request rejected.');
         } catch (\Exception $e) {
+            if ($httpRequest->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to reject: ' . $e->getMessage()], 422);
+            }
             return back()->with('error', 'Failed to reject: ' . $e->getMessage());
         }
     }
@@ -240,9 +276,21 @@ class ApprovalController extends Controller
                 $validated['reason']
             );
 
+            if ($httpRequest->wantsJson()) {
+                    session()->flash('success', 'Request sent back for revision.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Request sent back for revision.',
+                    'redirect' => route('approvals.director-queue')
+                ]);
+            }
+
             return redirect()->route('approvals.director-queue')
                 ->with('success', 'Request sent back for revision.');
         } catch (\Exception $e) {
+            if ($httpRequest->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to send back: ' . $e->getMessage()], 422);
+            }
             return back()->with('error', 'Failed to send back: ' . $e->getMessage());
         }
     }
@@ -315,16 +363,38 @@ class ApprovalController extends Controller
             if ($user->hasRole('director')) {
                 $this->procurementService->approveRequest($request, $user, 'Auto-approved after vendor assignment');
                 DB::commit();
+                
+                if ($httpRequest->wantsJson()) {
+                    session()->flash('success', 'Vendor assignments updated and request auto-approved successfully.');
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Vendor assignments updated and request auto-approved successfully.',
+                        'redirect' => route('requests.show', $request)
+                    ]);
+                }
+                
                 return redirect()->route('requests.show', $request)
                     ->with('success', 'Vendor assignments updated and request auto-approved successfully.');
             }
 
             DB::commit();
 
+            if ($httpRequest->wantsJson()) {
+                    session()->flash('success', 'Vendor assignments updated successfully. You can now approve or send back for revision.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vendor assignments updated successfully. You can now approve or send back for revision.',
+                    'redirect' => route('requests.show', $request)
+                ]);
+            }
+
             return redirect()->route('requests.show', $request)
                 ->with('success', 'Vendor assignments updated successfully. You can now approve or send back for revision.');
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($httpRequest->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to update assignments: ' . $e->getMessage()], 422);
+            }
             return back()->withInput()
                 ->with('error', 'Failed to update assignments: ' . $e->getMessage());
         }

@@ -115,7 +115,7 @@
                         <h4 class="card-title">Assign Vendors & Pricing</h4>
                     </div>
                     <div class="card-body" x-data="vendorAssignment()">
-                        <form action="{{ route('approvals.save-assignments', $request) }}" method="POST">
+                        <form action="{{ route('approvals.save-assignments', $request) }}" method="POST" class="ajax-form">
                             @csrf
 
                             <div x-data="vendorAssignment()" x-init="init()">

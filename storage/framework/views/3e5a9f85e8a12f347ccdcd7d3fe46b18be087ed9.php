@@ -214,7 +214,68 @@
 
     <!-- Page-specific scripts -->
     <?php echo $__env->yieldPushContent('scripts'); ?>
-</body>
+    <script>
+        // Global AJAX Form Handler
+        document.addEventListener('submit', async function(e) {
+            if (e.target && e.target.classList.contains('ajax-form')) {
+                e.preventDefault();
+                const form = e.target;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn ? submitBtn.innerHTML : '';
+                
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+                }
 
+                try {
+                    const formData = new FormData(form);
+                    const method = form.querySelector('input[name="_method"]')?.value || form.method || 'POST';
+                    
+                    const response = await fetch(form.action, {
+                        method: method.toUpperCase() === 'GET' ? 'GET' : 'POST',
+                        body: method.toUpperCase() === 'GET' ? null : formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        } else {
+                            window.location.reload();
+                        }
+                    } else {
+                        alert(data.message || 'An error occurred processing the request.');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        }
+                    }
+                } catch (error) {
+                    console.error('AJAX Form Error:', error);
+                    alert('A network error occurred.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                }
+            }
+        });
+        // Background Queue Processing trigger (Poor man's cron)
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                fetch('<?php echo e(route('api.run-queue')); ?>', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+                }).catch(() => {});
+            }, 1000);
+        });
+    </script>
+</body>
 
 </html><?php /**PATH /Users/Ahmadx/Downloads/archillery/resources/views/layouts/admin.blade.php ENDPATH**/ ?>

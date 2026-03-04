@@ -176,7 +176,7 @@
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <form action="{{ route('approvals.approve', $req) }}" method="POST"
-                                                        enctype="multipart/form-data">
+                                                        enctype="multipart/form-data" class="ajax-form">
                                                         @csrf
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Approve Request</h5>
@@ -210,7 +210,7 @@
                                         <div class="modal show d-block" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form action="{{ route('approvals.reject', $req) }}" method="POST">
+                                                    <form action="{{ route('approvals.reject', $req) }}" method="POST" class="ajax-form">
                                                         @csrf
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Reject Request</h5>
@@ -247,7 +247,7 @@
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <form action="{{ route('approvals.send-back', $req) }}"
-                                                        method="POST">
+                                                        method="POST" class="ajax-form">
                                                         @csrf
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Send Back for Revision</h5>

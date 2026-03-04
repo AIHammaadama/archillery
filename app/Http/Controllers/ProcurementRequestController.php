@@ -165,6 +165,7 @@ class ProcurementRequestController extends Controller
 
             // Return JSON for AJAX requests
             if ($request->expectsJson()) {
+                    session()->flash('success', 'Procurement request created successfully');
                 return response()->json([
                     'success' => true,
                     'message' => 'Procurement request created successfully',
@@ -326,9 +327,20 @@ class ProcurementRequestController extends Controller
         try {
             $this->procurementService->submitRequest($request, Auth::user());
 
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Request submitted successfully.',
+                    'redirect' => route('requests.show', $request)
+                ]);
+            }
+
             return redirect()->route('requests.show', $request)
                 ->with('success', 'Request submitted successfully.');
         } catch (\Exception $e) {
+            if (request()->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
             return back()->with('error', $e->getMessage());
         }
     }

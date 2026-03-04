@@ -179,11 +179,24 @@ class ProjectController extends Controller
 
             DB::commit();
 
+            if ($request->wantsJson()) {
+                    session()->flash('success', 'Project created successfully.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Project created successfully.',
+                    'redirect' => route('projects.index')
+                ]);
+            }
+
             return redirect()
                 ->route('projects.index')
                 ->with('success', 'Project created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to create project: ' . $e->getMessage()], 422);
+            }
 
             return back()
                 ->withInput()
@@ -400,11 +413,24 @@ class ProjectController extends Controller
 
             DB::commit();
 
+            if ($request->wantsJson()) {
+                    session()->flash('success', 'Project updated successfully.');
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Project updated successfully.',
+                    'redirect' => route('projects.show', $project)
+                ]);
+            }
+
             return redirect()
                 ->route('projects.show', $project)
                 ->with('success', 'Project updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to update project: ' . $e->getMessage()], 422);
+            }
 
             return back()
                 ->withInput()

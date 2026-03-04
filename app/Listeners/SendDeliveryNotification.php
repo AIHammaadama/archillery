@@ -18,9 +18,11 @@ class SendDeliveryNotification
 
         // Notify procurement officer
         if ($request->procurementOfficer) {
-            $request->procurementOfficer->notify(
-                new DeliveryReceivedNotification($delivery)
-            );
+            app()->terminating(function () use ($request, $delivery) {
+                $request->procurementOfficer->notify(
+                    new DeliveryReceivedNotification($delivery)
+                );
+            });
         }
 
         // Notify directors
@@ -29,9 +31,11 @@ class SendDeliveryNotification
         })->get();
 
         foreach ($directors as $director) {
-            $director->notify(
-                new DeliveryReceivedNotification($delivery)
-            );
+            app()->terminating(function () use ($director, $delivery) {
+                $director->notify(
+                    new DeliveryReceivedNotification($delivery)
+                );
+            });
         }
     }
 }
