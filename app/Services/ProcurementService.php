@@ -80,15 +80,6 @@ class ProcurementService
 
         $request->changeStatusTo(RequestStatus::SUBMITTED, $user, 'Request submitted for procurement');
 
-        // Assign to procurement officer from project
-        $procurementOfficer = $request->project->procurementOfficer();
-        if ($procurementOfficer) {
-            $request->update([
-                'procurement_officer_id' => $procurementOfficer->id,
-                'assigned_at' => now(),
-            ]);
-        }
-
         return true;
     }
 
@@ -97,6 +88,11 @@ class ProcurementService
      */
     public function acceptRequest(ProcurementRequest $request, User $user): bool
     {
+        $request->update([
+            'procurement_officer_id' => $user->id,
+            'assigned_at' => now(),
+        ]);
+
         $request->changeStatusTo(RequestStatus::PENDING_PROCUREMENT, $user, 'Request accepted by procurement officer');
         return true;
     }
@@ -106,6 +102,11 @@ class ProcurementService
      */
     public function startProcessing(ProcurementRequest $request, User $user): bool
     {
+        $request->update([
+            'procurement_officer_id' => $user->id,
+            'assigned_at' => $request->assigned_at ?? now(),
+        ]);
+
         $request->changeStatusTo(RequestStatus::PROCUREMENT_PROCESSING, $user, 'Started vendor assignment');
         return true;
     }
@@ -136,7 +137,15 @@ class ProcurementService
         if ($itemsWithoutVendors > 0) {
             throw new \Exception("Cannot submit for approval. {$itemsWithoutVendors} items do not have vendors assigned.");
         }
-        
+
+        // Make sure the user who assigned vendors is recorded as the procurement officer
+        if ($request->procurement_officer_id !== $user->id) {
+            $request->update([
+                'procurement_officer_id' => $user->id,
+                'assigned_at' => $request->assigned_at ?? now(),
+            ]);
+        }
+
         $request->changeStatusTo(RequestStatus::PENDING_DIRECTOR, $user, 'Submitted for director approval');
         return true;
     }
@@ -181,7 +190,7 @@ class ProcurementService
      */
     public function sendBackForRevision(ProcurementRequest $request, User $user, string $reason): bool
     {
-        $targetStatus = match($request->status) {
+        $targetStatus = match ($request->status) {
             RequestStatus::PENDING_DIRECTOR => RequestStatus::PROCUREMENT_PROCESSING,
             RequestStatus::PROCUREMENT_PROCESSING => RequestStatus::PENDING_PROCUREMENT,
             RequestStatus::PENDING_PROCUREMENT => RequestStatus::SUBMITTED,
